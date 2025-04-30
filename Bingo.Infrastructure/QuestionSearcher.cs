@@ -11,6 +11,7 @@ internal class Labels
     internal const string AcceptableAnswer = "Зачёт: ";
     internal const string NotAcceptableAnswer = "Незачёт: ";
     internal const string Comment = "Комментарий: ";
+    internal const string Note = "Замечания: ";
     internal const string AdditionalMaterial = "Раздаточный материал:";
     internal const string Sources = "Источники: ";
     internal const string Author = "Автор: ";

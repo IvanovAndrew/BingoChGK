@@ -7,7 +7,7 @@ public class Question : ValueObject<Question>
     public DateOnly Date { get; set; }
     public int Number { get; set; }
     public string Text { get; set; }
-    public string AdditionalMaterialText { get; set; } = string.Empty;
+    public string? AdditionalMaterialText { get; set; }
     public string? AdditionalMaterialPictureUrl { get; set; }
     public string Answer { get; set; }
     public string AcceptedAnswer { get; set; }

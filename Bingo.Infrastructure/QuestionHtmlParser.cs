@@ -15,6 +15,7 @@ public class QuestionHtmlParser
         [Labels.AcceptableAnswer] = (q, v) => q.AcceptedAnswer = v,
         [Labels.NotAcceptableAnswer] = (q, v) => q.NotAcceptedAnswer = v,
         [Labels.Comment] = (q, v) => q.Comment = v,
+        [Labels.Note] = (q, v) => q.Note = v,
         [Labels.Sources] = (q, v) => q.Sources = [v],
         [Labels.Author] = (q, v) => q.Authors = [v],
     };
@@ -71,9 +72,9 @@ public class QuestionHtmlParser
         }
     }
 
-    private void FillAdditionalMaterial(HtmlNode child, Question question)
+    private void FillAdditionalMaterial(HtmlNode node, Question question)
     {
-        var img = child.SelectSingleNode("//div[contains(@class, 'relative') and contains(@class, 'border')]//img");
+        var img = node.SelectSingleNode(".//div[contains(@class, 'relative') and contains(@class, 'border')]//img");
         if (img != null)
         {
             question.AdditionalMaterialPictureUrl = img.GetAttributeValue("src", string.Empty);
@@ -81,8 +82,14 @@ public class QuestionHtmlParser
         }
         else
         {
-            var text = child.InnerText.Replace(Labels.AdditionalMaterial, string.Empty).Trim();
-            question.AdditionalMaterialText = Escape(text);
+            var spans = node.SelectNodes(".//span[not(ancestor::button)]");
+            foreach (var span in spans)
+            {
+                if (span.InnerText.StartsWith(Labels.AdditionalMaterial)) continue;
+                
+                var text = span.InnerText.Replace(Labels.AdditionalMaterial, string.Empty).Trim();
+                question.AdditionalMaterialText = Escape(text);
+            }
         }
     }
 
