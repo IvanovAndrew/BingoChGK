@@ -1,0 +1,26 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=1972f4c1_002D2294_002D47fd_002D8511_002D52a4d532beac/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="CheckCamelotBingo #5" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;xUnit::DB7B3320-8DCC-4C62-8EA7-9A23A3B8B53B::net8.0::BingoChgk.Tests.Tests.CheckCamelotBingo&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=936daafd_002D5c45_002D4042_002Da863_002Dd2d3a0cf5bb7/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="CheckCamelotBingo #4" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;xUnit::DB7B3320-8DCC-4C62-8EA7-9A23A3B8B53B::net8.0::BingoChgk.Tests.Tests.CheckCamelotBingo&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=9d2f0688_002Dd580_002D4924_002D8110_002Db1f35c471509/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="CheckCamelotBingo #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;xUnit::DB7B3320-8DCC-4C62-8EA7-9A23A3B8B53B::net8.0::BingoChgk.Tests.Tests.CheckCamelotBingo&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::343E288A-1081-4A74-B72C-D79632493649::net8.0::BingoChgk.Domain.Tests.UnitTest1.Test1&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::DB7B3320-8DCC-4C62-8EA7-9A23A3B8B53B::net8.0::BingoChgk.Tests.Tests.GetQuestionById&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=ef5bba73_002D9355_002D4fe5_002D8b1f_002D7ef34518a997/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="CheckCamelotBingo #3" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;xUnit::DB7B3320-8DCC-4C62-8EA7-9A23A3B8B53B::net8.0::BingoChgk.Tests.Tests.CheckCamelotBingo&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::343E288A-1081-4A74-B72C-D79632493649::net8.0::BingoChgk.Domain.Tests.UnitTest1.Test1&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::DB7B3320-8DCC-4C62-8EA7-9A23A3B8B53B::net8.0::BingoChgk.Tests.Tests.GetQuestionById&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
