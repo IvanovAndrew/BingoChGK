@@ -1,7 +1,6 @@
 ﻿using Bingo.Domain;
 using Bingo.Infrastructure;
 using HtmlAgilityPack;
-using Xunit;
 using Assert = Xunit.Assert;
 
 namespace BingoChgk.Tests;
@@ -25,7 +24,7 @@ public class QuestionHTMLParserTest
         Assert.Equal("Камелот.", question.Answer);
         Assert.Equal("Выпущены монеты \"от имени\" Камелота, посвященные Артуриане.", question.Comment);
         Assert.Equal("Разве Камелот не замок, а страна? (Борис Моздухов)", question.Note);
-        CollectionAssert.Contains(question.Authors, "Алексей Паевский");
+        Assert.Contains("Алексей Паевский", question.Authors);
     }
 
     [Fact]
@@ -49,7 +48,7 @@ public class QuestionHTMLParserTest
         Assert.Equal("Пилтда\u0301ун.", question.Answer);
         Assert.Equal("Пильтдаун.", question.AcceptedAnswer);
         Assert.Equal("эти герои — мошенники, которые хотят выдать построенное сооружение за развалины Камелота легендарного короля Арту\u0301ра. Когда один из них сомневается в том, что подделку не распознают археологи, второй упоминает деревню Пилтдаун, намекая на Пилтдаунского человека — фальсификацию, в которую на некоторое время поверили палеоантропологи.", question.Comment);
-        CollectionAssert.Contains(question.Authors, "Максим Мерзляков");
+        Assert.Contains("Максим Мерзляков", question.Authors);
     }
     
     [Fact]
@@ -72,8 +71,8 @@ public class QuestionHTMLParserTest
         Assert.Equal("Come Lot.", question.Answer);
         Assert.Equal("Come-A-Lot.", question.AcceptedAnswer);
         Assert.Equal("Название этого казино созвучно слову \"Камелот\".", question.Comment);
-        CollectionAssert.Contains(question.Sources, "http://es.gta.wikia.com/wiki/Casino_Come-A-Lot");
-        CollectionAssert.Contains(question.Authors, "Константин Науменко");
+        Assert.Contains("http://es.gta.wikia.com/wiki/Casino_Come-A-Lot", question.Sources);
+        Assert.Contains("Константин Науменко", question.Authors);
     }
     
     [Fact]
@@ -98,7 +97,7 @@ public class QuestionHTMLParserTest
         Assert.Equal("Ланселот", question.Answer);
         Assert.Equal("точный ответ.", question.AcceptedAnswer);
         Assert.Equal("Джон Кеннеди был поклонником мюзикла “Камелот” и даже отождествлял себя с королем Артуром, а данная финальная строфа стала лучшей эпитафией его двухлетнему президентству.", question.Comment);
-        CollectionAssert.Contains(question.Authors, "Елена Ханенкова");
+        Assert.Contains("Елена Ханенкова", question.Authors);
     }
     
     [Fact]
@@ -116,14 +115,14 @@ public class QuestionHTMLParserTest
         Assert.Equal("Reggae Fever", question.PackTitle);
         Assert.Equal(new DateOnly(2021, 4, 1), question.Date);
         Assert.Equal(0, question.Number);
-        StringAssert.StartsWith("Разминочный вопрос. Ответ на него сдавать не нужно.", question.Text);
-        StringAssert.EndsWith("Заглавный герой этой песни вламывается в гостиничный номер с пушкой, но находит там только Библию Гидео\u0301на. В другом произведении Халк помогает ИКСу вернуть артефакт, известный как «Библия Гидео\u0301на». Назовите ИКСа.", question.Text);
+        Assert.StartsWith("Разминочный вопрос. Ответ на него сдавать не нужно.", question.Text);
+        Assert.EndsWith("Заглавный герой этой песни вламывается в гостиничный номер с пушкой, но находит там только Библию Гидео\u0301на. В другом произведении Халк помогает ИКСу вернуть артефакт, известный как «Библия Гидео\u0301на». Назовите ИКСа.", question.Text);
         
         Assert.Equal("Rocky Typhoon", question.AdditionalMaterialText);
         Assert.Equal("[енот] Ракета.", question.Answer);
         Assert.Equal("Реактивный енот.", question.AcceptedAnswer);
         Assert.Equal("слово «Racсoon» [раку\u0301н] («енот» с английского) мы изменили до «Typhoon» [тайфун]. Считается, что появление героя комиксов енота Ракеты связано с песней Битлз «Rocky Raccoon» [ро\u0301ки ракун], герой которой тоже вооружён пушкой и безбашен, но, судя по тексту, всё же человек. Мы последовали примеру Антона Саксонова и его «Бесконечной» франшизы и сделали разминочный вопрос по комиксам. Хейтеров можем обрадовать – больше их в пакете не будет.", question.Comment);
-        CollectionAssert.Contains(question.Authors, "Руслан Алиев");
+        Assert.Contains("Руслан Алиев", question.Authors);
     }
     
     private Question Parse(string text)
