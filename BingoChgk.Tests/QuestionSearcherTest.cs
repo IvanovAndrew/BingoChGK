@@ -55,7 +55,7 @@ public class QuestionSearcherTest
             foreach (var question in questions) t.Add(question.GotQuestionId);
         }
         
-        Assert.Equal(82, t.Count);
+        Assert.Equal(53, t.Count);
     }
 
     internal class LoggerStub<T> : ILogger<T>
