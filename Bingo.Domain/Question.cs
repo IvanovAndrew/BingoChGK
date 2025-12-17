@@ -2,7 +2,7 @@
 
 public class Question : ValueObject<Question>
 {
-    public int Id { get; init; }
+    public int GotQuestionId { get; init; }
     public string PackTitle { get; set; }
     public DateOnly Date { get; set; }
     public int Number { get; set; }
@@ -13,19 +13,22 @@ public class Question : ValueObject<Question>
     public string AcceptedAnswer { get; set; }
     public string NotAcceptedAnswer { get; set; }
     public string Comment { get; set; }
+    public string CommentPictureUrl { get; set; }
     public string Note { get; set; }
     public string Author { get; set; }
     public string Editor { get; set; }
-    public int BingoId { get; set; }
     public string[] Sources { get; set; }
     public string[] Authors { get; set; }
+    public List<int> Teams { get; set; }
+    public List<int> CorrectAnswers { get; set; }
+
     protected override bool EqualsCore(Question other)
     {
-        return BingoId == other.BingoId && Id == other.Id;
+        return GotQuestionId == other.GotQuestionId;
     }
 
     protected override int GetHashCodeCore()
     {
-        return HashCode.Combine(BingoId, Id);
+        return GotQuestionId.GetHashCode();
     }
 }
