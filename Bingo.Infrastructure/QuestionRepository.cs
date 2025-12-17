@@ -1,44 +1,33 @@
 ﻿using Bingo.Domain;
 using Bingo.Infrastructure.Database;
+using Microsoft.Extensions.Logging;
+using Supabase;
 
 namespace Bingo.Infrastructure;
 
-public class QuestionRepository(Supabase.Client db) : IQuestionRepository
+public class QuestionRepository(Client db, ILogger<QuestionRepository> logger) : IQuestionRepository
 {
-    public async Task<List<Question>> GetQuestions(int bingoId)
+    public async Task<List<int>> GetQuestions(int bingoId)
     {
-        var questionFromDb =  await db.From<QuestionDb>()
+        var questionFromDb =  await db.From<BingoQuestionLinkDb>()
             .Where(q => q.BingoId == bingoId)
             .Get();
             
         return questionFromDb.Models
-            .Select(QuestionMapper.ToDomain)
+            .Select(_ => _.GotQuestionId)
             .ToList();
     }
 
-    public async Task<Question?> GetQuestionById(int questionID)
+    public async ValueTask InsertQuestionsToBingo(List<Question> questionsToAdd, int bingoId)
     {
-        var dbResponse =  await db.From<QuestionDb>()
-            .Where(q => q.Id == questionID)
-            .Get();
-        
-        if (dbResponse.Model != null)
-        {
-            return QuestionMapper.ToDomain(dbResponse.Model);
-        }
-        return null;
+        await db.From<BingoQuestionLinkDb>().Insert(questionsToAdd.Select(x => new BingoQuestionLinkDb(){BingoId = bingoId, GotQuestionId = x.GotQuestionId}).ToList());
     }
 
-    public async ValueTask InsertQuestions(List<Question> questionsToAdd)
-    {
-        await db.From<QuestionDb>().Insert(questionsToAdd.Select(QuestionMapper.FromDomain).ToList());
-    }
-
-    public async ValueTask<bool> DeleteQuestion(int questionId)
+    public async ValueTask<bool> DeleteQuestionFromBingo(int questionId, int bingoId)
     {
         if (questionId > 0)
         {
-            await db.From<QuestionDb>().Where(q => q.Id == questionId).Delete();
+            await db.From<BingoQuestionLinkDb>().Where(q => q.BingoId == bingoId && q.GotQuestionId == questionId).Delete();
             return true;
         }
 
