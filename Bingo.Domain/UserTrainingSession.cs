@@ -13,6 +13,7 @@ public class UserTrainingSession : AggregateRoot
     
     private Dictionary<int, DateTime> _lastLearntBingo = new();
     private Dictionary<int, DateTime> _lastAskedQuestions = new();
+
     public User User { get; init; }
 
     public UserTrainingSession(User user, Dictionary<int, DateTime> lastLearntBingo)
@@ -38,37 +39,40 @@ public class UserTrainingSession : AggregateRoot
     {
         var list = new List<Bingo>(bingos.Count);
 
-        foreach (var bingo in bingos)
+        if (_lastLearntBingo != null)
         {
-            
-            if (_lastLearntBingo.TryGetValue(bingo.Id, out var date) && date.AddDays(DAY_INTERVAL) >= DateTime.Today)
+            foreach (var bingo in bingos)
             {
-                continue;
-            }
+                if (_lastLearntBingo.TryGetValue(bingo.Id, out var date) && date.AddDays(DAY_INTERVAL) >= DateTime.Today)
+                {
+                    continue;
+                }
             
-            list.Add(bingo);
+                list.Add(bingo);
+            }
         }
 
         return list;
     }
 
-    public Question GetBingoQuestion(Bingo bingo)
+    public Question GetBingoQuestion(int bingoId, IReadOnlyList<Question> questions)
     {
-        if (bingo.Questions.Count == 0)
+        if (questions.Count == 0)
         {
-            throw new InvalidOperationException($"Bingo {bingo.Text} doesn't have any questions");
+            //_logger.LogInformation($"Bingo {bingoId} doesn't have any questions");
         }
 
-        var newQuestions = GetNewQuestions(bingo.Questions);
+        IReadOnlyList<Question> newQuestions = GetNewQuestions(questions);
 
         if (newQuestions.Count == 0)
         {
-            throw new InvalidOperationException($"Bingo {bingo.Text} doesn't have any new questions");
+            //_logger.LogInformation($"Bingo {bingoId} doesn't have any new questions");
+            newQuestions = questions;
         }
-        
+
         var questionToAsk = Randomizer.GetRandomElement(newQuestions);
-        _lastAskedQuestions[questionToAsk.Id] = DateTime.Now;
-        
+        _lastAskedQuestions[questionToAsk.GotQuestionId] = DateTime.Now;
+
         AddEvent(new QuestionAskedDomainEvent());
 
         return questionToAsk;
@@ -80,7 +84,7 @@ public class UserTrainingSession : AggregateRoot
 
         foreach (var question in questions)
         {
-            if (_lastAskedQuestions.TryGetValue(question.Id, out var date) && date.AddDays(DAY_INTERVAL) >= DateTime.Today)
+            if (_lastAskedQuestions.TryGetValue(question.GotQuestionId, out var date) && date.AddDays(DAY_INTERVAL) >= DateTime.Today)
             {
                 continue;
             }
