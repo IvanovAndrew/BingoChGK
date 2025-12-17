@@ -1,6 +1,7 @@
 using System.Reflection;
 using Bingo.Application;
 using Bingo.Application.AddBingo;
+using Bingo.Application.Services;
 using Bingo.Domain;
 using Bingo.Infrastructure;
 using BingoChGK;
@@ -45,21 +46,18 @@ var host = new HostBuilder()
 
         services.AddSingleton<ISessionService, AzureTableSessionService>();
         services.AddSingleton<IConversationFlowManager, ConversationFlowManager>();
-
-        services.AddSingleton<QuestionDBDecorator>(provider =>
-            new QuestionDBDecorator(
-                provider.GetRequiredService<QuestionSearcher>(),
-                provider.GetRequiredService<IBingoRepository>(),
-                provider.GetRequiredService<IQuestionRepository>(),
-                provider.GetRequiredService<ILogger<QuestionDBDecorator>>()));
+        
+        services.AddSingleton<IBingoLookupService, BingoLookupService>();
 
         services.AddSingleton<IQuestionSearcher>(provider =>
-            new QuestionsCacheDecorator(provider.GetRequiredService<QuestionDBDecorator>(),
+            new QuestionsCacheDecorator(provider.GetRequiredService<QuestionSearcher>(),
                 provider.GetRequiredService<ILogger<QuestionsCacheDecorator>>()));
 
         services.AddSingleton<ITelegramBot, TelegramBotImpl>(s =>
             ActivatorUtilities.CreateInstance<TelegramBotImpl>(s, Environment.GetEnvironmentVariable("token")));
 
+        services.AddSingleton<BingoQuestionService>();
+        services.AddSingleton<IQuestionService, QuestionService>();
 
         services.AddSingleton<AzureFunction>();
     })
