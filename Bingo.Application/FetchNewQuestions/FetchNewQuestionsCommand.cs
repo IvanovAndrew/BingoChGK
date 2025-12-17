@@ -1,29 +1,66 @@
 ﻿using Bingo.Domain;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace Bingo.Application.FetchNewQuestions;
 
-public record FetchNewQuestionsCommand(int bingoId) : IRequest
+public record FetchNewQuestionsCommand : IRequest
 {
+    public int BingoId { get; init; }
 }
 
-public class FetchNewQuestionsCommandHandler(IBingoRepository bingoRepository, IQuestionSearcher questionSearcher, IQuestionRepository questionRepository, IMediator mediator) : IRequestHandler<FetchNewQuestionsCommand>
+public class FetchNewQuestionsCommandHandler(IBingoRepository bingoRepository, IQuestionService questionService, ILogger<FetchNewQuestionsCommandHandler> logger) : IRequestHandler<FetchNewQuestionsCommand>
 {
     public async Task Handle(FetchNewQuestionsCommand request, CancellationToken cancellationToken)
     {
-        var bingo = await bingoRepository.GetBingoByID(request.bingoId);
+        logger.LogInformation("Fetching new questions for bingo ID: {BingoId}", request.BingoId);
 
-        var lastQuestionDay = bingo.LastQuestionDateOrDefault;
-
-        var questions = await questionSearcher.GetQuestions(bingo.Text, bingo.Id, lastQuestionDay);
-        
-        bingo.AddQuestions(questions);
-
-        await questionRepository.InsertQuestions(questions);
-
-        foreach (var domainEvent in bingo.GetEvents())
+        var bingo = await bingoRepository.GetBingoByID(request.BingoId);
+        if (bingo == null)
         {
-            await mediator.Publish(domainEvent, cancellationToken);
+            logger.LogWarning("Bingo with ID {BingoId} not found", request.BingoId);
+            return;
         }
+
+        var existingQuestions = await questionService.GetQuestions(bingo.Id);
+        var latestDate = existingQuestions.Any()
+            ? existingQuestions.Max(q => q.Date)
+            : DateOnly.MinValue;
+
+        logger.LogInformation("Latest known question date for bingo {BingoId} is {Date}", bingo.Id, latestDate);
+        
+        var newQuestions = await questionService.GetNewQuestions(bingo.Text, latestDate);
+        
+        var synonyms = await bingoRepository.GetBingoSynonyms(bingo.Id);
+
+        foreach (var synonym in synonyms)
+        {
+            var synonymQuestions = await questionService.GetNewQuestions(synonym, latestDate);
+            newQuestions.AddRange(synonymQuestions);
+        }
+
+        newQuestions = MergeQuestions(newQuestions);
+        logger.LogInformation("{Count} new question(s) found for bingo {BingoId}", newQuestions.Count, bingo.Id);
+
+        if (newQuestions.Count > 0)
+        {
+            await questionService.LinkQuestionsToBingo(newQuestions, bingo.Id);
+            logger.LogInformation("New questions inserted for bingo {BingoId}", bingo.Id);
+        }
+
+        logger.LogInformation("Finished fetching new questions for bingo {BingoId}", bingo.Id);
+    }
+
+    private List<Question> MergeQuestions(List<Question> newQuestions)
+    {
+        var dict = new Dictionary<int, Question>();
+
+        foreach (var question in newQuestions)
+        {
+            if (!dict.TryAdd(question.GotQuestionId, question))
+                continue;
+        }
+        
+        return dict.Values.ToList();
     }
 }

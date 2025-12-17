@@ -48,11 +48,11 @@ public class QuestionHtmlParser
         return question;
     }
 
-    private void FillQuestion(Question question, HtmlNode child)
+    private void FillQuestion(Question jsonQuestion, HtmlNode child)
     {
-        if (string.IsNullOrEmpty(question.Text))
+        if (string.IsNullOrEmpty(jsonQuestion.Text))
         {
-            question.Text = Escape(child.InnerText);
+            jsonQuestion.Text = Escape(child.InnerText);
         }
         else if (!string.IsNullOrEmpty(child.InnerText))
         {
@@ -66,19 +66,19 @@ public class QuestionHtmlParser
                 if (handler.Key != null)
                 {
                     var value = Escape(info.Replace(handler.Key, string.Empty));
-                    handler.Value(question, value);
+                    handler.Value(jsonQuestion, value);
                 }
             }
         }
     }
 
-    private void FillAdditionalMaterial(HtmlNode node, Question question)
+    private void FillAdditionalMaterial(HtmlNode node, Question jsonQuestion)
     {
         var img = node.SelectSingleNode(".//div[contains(@class, 'relative') and contains(@class, 'border')]//img");
         if (img != null)
         {
-            question.AdditionalMaterialPictureUrl = img.GetAttributeValue("src", string.Empty);
-            question.AdditionalMaterialText = string.Empty;
+            jsonQuestion.AdditionalMaterialPictureUrl = img.GetAttributeValue("src", string.Empty);
+            jsonQuestion.AdditionalMaterialText = string.Empty;
         }
         else
         {
@@ -88,29 +88,29 @@ public class QuestionHtmlParser
                 if (span.InnerText.StartsWith(Labels.AdditionalMaterial)) continue;
                 
                 var text = span.InnerText.Replace(Labels.AdditionalMaterial, string.Empty).Trim();
-                question.AdditionalMaterialText = Escape(text);
+                jsonQuestion.AdditionalMaterialText = Escape(text);
             }
         }
     }
 
-    private void FillPackageInfo(HtmlNode node, Question question)
+    private void FillPackageInfo(HtmlNode node, Question jsonQuestion)
     {
         // the first node
         string questionNumberAsAString = node.ChildNodes[0].InnerText.Replace(Labels.Question, string.Empty).Trim();
-        question.Number = int.Parse(questionNumberAsAString);
+        jsonQuestion.Number = int.Parse(questionNumberAsAString);
 
         var grandChildren = node.ChildNodes[1].FirstChild.FirstChild.ChildNodes;
 
-        question.PackTitle = Escape(grandChildren[0].ChildNodes[0].InnerText);
+        jsonQuestion.PackTitle = Escape(grandChildren[0].ChildNodes[0].InnerText);
         if (DateOnly.TryParseExact(grandChildren[0].ChildNodes[1].InnerText.Trim().Trim('·').Trim(), DateMask,
                 _cultureInfo, DateTimeStyles.None, out var date))
         {
-            question.Date = date;
+            jsonQuestion.Date = date;
         }
     }
 
     private string Escape(string s)
     {
-        return HtmlEntity.DeEntitize(s);
+        return HtmlEntity.DeEntitize(s).Replace("\r", string.Empty);
     }
 }

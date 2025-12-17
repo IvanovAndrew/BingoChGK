@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 namespace Bingo.Application.DeleteQuestion;
 
 public class DeleteQuestionCommandHandler(
-    IBingoRepository bingoRepository,
     IQuestionRepository questionRepository,
     IMediator mediator,
     ILogger<DeleteQuestionCommandHandler> logger)
@@ -15,31 +14,26 @@ public class DeleteQuestionCommandHandler(
 
     public async Task Handle(DeleteQuestionCommand command, CancellationToken cancellationToken)
     {
-        _logger.LogInformation(nameof(DeleteQuestionCommandHandler));
+        _logger.LogInformation($"Started {command}");
 
-        var bingo = await bingoRepository.GetBingoByID(command.BingoID);
-        if (bingo == null)
-        {
-            _logger.LogWarning($"Bingo {command.BingoID} hasn't been found");
-            return;
-        }
-        
-        var deleted = bingo.DeleteQuestion(command.QuestionID, command.ChatId);
+        var deleted = await questionRepository.DeleteQuestionFromBingo(command.QuestionID, command.BingoID);
+
         if (deleted)
         {
-            await questionRepository.DeleteQuestion(command.QuestionID);
-            _logger.LogInformation($"Question {command.QuestionID} has been removed");
+            _logger.LogInformation("Question {QuestionId} removed from Bingo {BingoId}", command.QuestionID, command.BingoID);
+
+            var domainEvent = new QuestionRemovedDomainEvent
+            {
+                BingoId = command.BingoID,
+                QuestionId = command.QuestionID,
+                DeletedBy = command.ChatId
+            };
+
+            await mediator.Publish(domainEvent, cancellationToken);
         }
         else
         {
-            _logger.LogWarning($"Question {command.QuestionID} not found in Bingo {command.BingoID}. Deletion failed.");
+            _logger.LogWarning("Question {QuestionId} not found in Bingo {BingoId}.", command.QuestionID, command.BingoID);
         }
-
-        foreach (var domainEvent in bingo.GetEvents())
-        {
-            await mediator.Publish(domainEvent, cancellationToken);
-        }
-        
-        bingo.ClearEvents();
     }
 }

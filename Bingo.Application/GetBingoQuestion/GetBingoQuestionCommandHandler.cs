@@ -1,27 +1,29 @@
-﻿using Bingo.Domain;
+﻿using Bingo.Application.FetchNewQuestions;
+using Bingo.Domain;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace Bingo.Application.GetBingoQuestion;
 
 public class GetBingoQuestionCommandHandler(
-    IBingoRepository bingoRepository,
+    BingoQuestionService bingoQuestionService,
     IUserRepository userRepository,
     ITelegramBot telegramBot,
+    IMediator mediator,
     ILogger<GetBingoQuestionCommandHandler> logger)
     : IRequestHandler<GetBingoQuestionCommand>
 {
     public async Task Handle(GetBingoQuestionCommand command, CancellationToken cancellationToken)
     {
-        logger.LogInformation(nameof(GetBingoQuestionCommandHandler));
+        logger.LogInformation($"Started {command}");
 
         var trainingSession = await userRepository.GetUserSession(command.ChatId);
         
-        var bingo = await bingoRepository.GetBingoByID(command.BingoId);
+        var questions = await bingoQuestionService.GetQuestionsForBingoAsync(command.BingoId);
         
-        if (bingo.Questions.Count > 0)
+        if (questions.Any())
         {
-            var question = trainingSession.GetBingoQuestion(bingo);
+            var question = trainingSession.GetBingoQuestion(command.BingoId, questions);
                     
             var format = QuestionFormatter.FormatQuestion(question);
 
@@ -32,17 +34,17 @@ public class GetBingoQuestionCommandHandler(
             {
                 buttons =
                 [
-                    new() { Text = "Next question", Callback = $"/question {bingo.Id}"},
-                    new() { Text = "Delete", Callback = $"/deletequestion {question.Id} bingo {bingo.Id}"},
-                    new() { Text = "Next bingo", Callback = "/random"}
+                    TelegramButton.ShowAQuestionButton(command.BingoId, "Next question"),
+                    TelegramButton.DeleteQuestionButton(command.BingoId, question.GotQuestionId, "Delete"),
+                    TelegramButton.ShowRandomBingoButton("Next bingo"),
                 ];
             }
             else
             {
                 buttons =
                 [
-                    new() { Text = "Next question", Callback = $"/question {bingo.Id}"},
-                    new() { Text = "Next bingo", Callback = "/random"}
+                    TelegramButton.ShowAQuestionButton(command.BingoId, "Next question"),
+                    TelegramButton.ShowRandomBingoButton("Next bingo"),
                 ];
             }
 
@@ -57,11 +59,19 @@ public class GetBingoQuestionCommandHandler(
                 sentMessage = await telegramBot.SendTextMessageAsync(user.Id, format, useMarkdown:true, buttons: buttons, cancellationToken: cancellationToken);
             }
             
-            logger.LogInformation($"Question id is {question.Id}. Text is {format}");
+            logger.LogInformation($"Question id is {question.GotQuestionId}. Text is {format}");
         }
         else
         {
-            await telegramBot.SendTextMessageAsync(command.ChatId, $"There are no questions about {bingo.Text}", useMarkdown:true, cancellationToken: cancellationToken);
+            if (command.RetryIfNoQuestions)
+            {
+                await mediator.Send(new FetchNewQuestionsCommand(){BingoId = command.BingoId}, cancellationToken);
+                await mediator.Send(command with {RetryIfNoQuestions = false}, cancellationToken);
+            }
+            else
+            {
+                await telegramBot.SendTextMessageAsync(command.ChatId, $"There are no questions for the bingo", useMarkdown:true, cancellationToken: cancellationToken);
+            }
         }
     }
 }

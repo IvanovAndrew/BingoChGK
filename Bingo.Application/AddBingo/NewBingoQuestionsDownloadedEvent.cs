@@ -21,9 +21,9 @@ public class NewBingoQuestionsDownloadedEventHandler(ITelegramBot telegramBot) :
             $"{notification.QuestionsCount} {(notification.QuestionsCount > 1 ? "questions" : "question")} for {notification.BingoWord} {(notification.QuestionsCount % 10 == 1 ? "has" : "have")} been added",
             buttons: new TelegramButton[]
             {
-                new() { Text = "Edit the description", Callback = $"/editdescription {notification.BingoId}" },
-                new() { Text = "Show a question", Callback = $"/question {notification.BingoId}" },
-                new() { Text = "ОК", Callback = $"/skip" }
+                TelegramButton.EditDescriptionButton(notification.BingoId),
+                TelegramButton.ShowAQuestionButton(notification.BingoId),
+                TelegramButton.SkipButton("OK"),
             }, cancellationToken: cancellationToken);
     }
 }
