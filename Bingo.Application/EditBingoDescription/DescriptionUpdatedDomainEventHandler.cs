@@ -8,7 +8,14 @@ public class DescriptionUpdatedDomainEventHandler(ITelegramBot telegramBot, ILog
 {
     public async Task Handle(DescriptionUpdatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        logger.LogInformation(nameof(DescriptionUpdatedDomainEventHandler));
-        await telegramBot.SendTextMessageAsync(notification.UpdatedBy, $"Bingo '{notification.Bingo}' has been updated", cancellationToken: cancellationToken);
+        logger.LogInformation($"{nameof(DescriptionUpdatedDomainEventHandler)} {notification}");
+        
+        await telegramBot.SendTextMessageAsync(notification.UpdatedBy, $"Bingo \"{notification.Bingo}\" has been updated",
+            buttons:
+            [
+                TelegramButton.ShowAQuestionButton(notification.BingoId),
+                TelegramButton.SkipButton("OK")
+            ],
+            cancellationToken: cancellationToken);
     }
 }
