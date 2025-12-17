@@ -28,10 +28,10 @@ public class AddBingoCommandHandler(
         
         await mediator.Publish(new DownloadingNewBingoQuestionsStartedEvent() { ChatId = command.ChatId, MessageId = command.MessageToEdit }, cancellationToken);
         
-        var questionsToAdd = await questionSearcher.GetQuestions(bingoWord, newBingo.Id);
+        var questionsToAdd = await questionSearcher.GetQuestions(bingoWord);
         if (questionsToAdd.Count != 0)
         {
-            await questionRepository.InsertQuestions(questionsToAdd);
+            await questionRepository.InsertQuestionsToBingo(questionsToAdd, newBingo.Id);
             _logger.LogInformation(
                 $"{questionsToAdd.Count} question{(questionsToAdd.Count > 1 ? "s" : "")} for bingo {bingoWord} {(questionsToAdd.Count > 1 ? "have" : "has")} been added");
         }
