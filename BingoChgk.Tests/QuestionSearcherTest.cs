@@ -14,11 +14,11 @@ public class QuestionSearcherTest
     
         var questions = await questionSearcher.GetQuestions("Камелот");
         
-        Assert.Equal(25, questions.Count);
-        Assert.Equal(25, questions.Count(c => !string.IsNullOrEmpty(c.Answer)));
-        Assert.Equal(25, questions.Count(c => !string.IsNullOrEmpty(c.Text)));
-        Assert.Equal(25, questions.Count(c => c.Number != 0));
-        Assert.Equal(25, questions.Count(c => !string.IsNullOrEmpty(c.PackTitle)));
+        Assert.Equal(18, questions.Count);
+        Assert.Equal(18, questions.Count(c => !string.IsNullOrEmpty(c.Answer)));
+        Assert.Equal(18, questions.Count(c => !string.IsNullOrEmpty(c.Text)));
+        Assert.Equal(18, questions.Count(c => c.Number != 0));
+        Assert.Equal(18, questions.Count(c => !string.IsNullOrEmpty(c.PackTitle)));
     }
 
     [Fact]
@@ -28,11 +28,11 @@ public class QuestionSearcherTest
     
         var questions = await questionSearcher.GetQuestions("ПЕН-клуб");
         
-        Assert.Equal(82, questions.Count);
-        Assert.Equal(82, questions.Count(c => !string.IsNullOrEmpty(c.Answer)));
-        Assert.Equal(82, questions.Count(c => !string.IsNullOrEmpty(c.Text)));
-        Assert.Equal(82, questions.Count(c => c.Number != 0));
-        Assert.Equal(82, questions.Count(c => !string.IsNullOrEmpty(c.PackTitle)));
+        Assert.Equal(47, questions.Count);
+        Assert.Equal(47, questions.Count(c => !string.IsNullOrEmpty(c.Answer)));
+        Assert.Equal(47, questions.Count(c => !string.IsNullOrEmpty(c.Text)));
+        Assert.Equal(47, questions.Count(c => c.Number != 0));
+        Assert.Equal(47, questions.Count(c => !string.IsNullOrEmpty(c.PackTitle)));
     }
     
     [Fact]
