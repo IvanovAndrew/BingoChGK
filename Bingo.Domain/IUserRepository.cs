@@ -6,5 +6,6 @@ public interface IUserRepository
     Task CreateUser(User user);
     Task<User?> GetUserById(long chatId);
     Task<UserTrainingSession> GetUserSession(long chatId);
-    Task SaveSession(long chatId, int bingoId, DateTime date);
+    Task SaveSession(long chatId, int bingoId, DateTime date, CancellationToken cancellationToken);
+    Task Update(User user);
 }

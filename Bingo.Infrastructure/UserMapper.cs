@@ -7,20 +7,15 @@ public static class UserMapper
 {
     public static User ToDomain(SubscriberDb subscriberDb)
     {
-        return new User()
-        {
-            Id = subscriberDb.Id,
-            CanAddBingo = subscriberDb.IsAdmin,
-            CanRemoveQuestion = subscriberDb.IsAdmin
-        };
+        return new User(subscriberDb.Id, subscriberDb.IsActive, subscriberDb.IsAdmin);
     }
     
-    public static SubscriberDb FromDomain(Domain.User user)
+    public static SubscriberDb FromDomain(User user)
     {
         return new SubscriberDb()
         {
             Id = user.Id,
-            IsActive = true,
+            IsActive = user.IsActive,
             IsAdmin = user.CanAddBingo || user.CanRemoveQuestion
         };
     }

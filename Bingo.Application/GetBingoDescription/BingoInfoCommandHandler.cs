@@ -21,7 +21,7 @@ public class GetBingoDescriptionCommandHandler(
         
         if (lookupResult.Bingo is {} bingo)
         {
-            await userRepository.SaveSession(command.ChatId, bingo.Id, DateTime.UtcNow);
+            await userRepository.SaveSession(command.ChatId, bingo.Id, DateTime.UtcNow, cancellationToken);
 
             var description = BuildDescription(bingo);
 

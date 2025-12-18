@@ -7,7 +7,7 @@ public class DomainTest
     [Fact]
     public void BingoQuestionsDoNotRepeatThemselves()
     {
-        var user = new User() { Id = 1, CanRemoveQuestion = false, CanAddBingo = false };
+        var user = new User(1, true, false);
 
         var userSession = new UserTrainingSession(user, new Dictionary<int, DateTime>());
 
@@ -28,7 +28,7 @@ public class DomainTest
     [Fact]
     public void WhenAllBingoQuestionsAreShown_RepeatThem()
     {
-        var user = new User() { Id = 1, CanRemoveQuestion = false, CanAddBingo = false };
+        var user = new User(1, true, false);
 
         var userSession = new UserTrainingSession(user, new Dictionary<int, DateTime>());
 

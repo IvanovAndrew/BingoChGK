@@ -23,16 +23,17 @@ var host = new HostBuilder()
         var dbClient = new Supabase.Client(
             Environment.GetEnvironmentVariable("SUPABASE_URL"),
             Environment.GetEnvironmentVariable("SUPABASE_KEY"));
+        
+        services.AddSingleton(dbClient);
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        services.AddSingleton<BingoRepository>(s => ActivatorUtilities.CreateInstance<BingoRepository>(s, dbClient));
-        services.AddSingleton<IBingoRepository, BingoRepositoryCacheDecorator>(provider =>
+        services.AddScoped<BingoRepository>();
+        services.AddScoped<IBingoRepository, BingoRepositoryCacheDecorator>(provider =>
             new BingoRepositoryCacheDecorator(provider.GetRequiredService<BingoRepository>(),
                 provider.GetRequiredService<ILogger<BingoRepositoryCacheDecorator>>()));
 
-        services.AddSingleton<UserRepository>(s => ActivatorUtilities.CreateInstance<UserRepository>(s, dbClient));
-        services.AddSingleton<IUserRepository, UserRepositoryCacheDecorator>(provider =>
-            new UserRepositoryCacheDecorator(provider.GetRequiredService<UserRepository>(),
-                provider.GetRequiredService<ILogger<UserRepository>>()));
+        
+        services.AddScoped<IUserRepository, UserRepository>();
 
         services.AddSingleton<IQuestionRepository, QuestionRepository>(s =>
             ActivatorUtilities.CreateInstance<QuestionRepository>(s, dbClient));
