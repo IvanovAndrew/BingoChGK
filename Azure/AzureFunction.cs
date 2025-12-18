@@ -8,6 +8,8 @@ using Bingo.Application.GetBingoDescription;
 using Bingo.Application.GetBingoQuestion;
 using Bingo.Application.RandomBingoDescription;
 using Bingo.Application.SendRandomBingoToActiveSubscribers;
+using Bingo.Application.Subscribe;
+using Bingo.Domain;
 using MediatR;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -15,10 +17,11 @@ using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using User = Bingo.Domain.User;
 
 namespace BingoChGK;
 
-public class AzureFunction(IMediator mediator, ITelegramBot telegramBot, IConversationFlowManager conversationFlowManager, ILoggerFactory loggerFactory)
+public class AzureFunction(IMediator mediator, ITelegramBot telegramBot, IConversationFlowManager conversationFlowManager, IUserRepository userRepository, ILoggerFactory loggerFactory)
 {
     private readonly ILogger _logger = loggerFactory.CreateLogger<AzureFunction>();
 
@@ -31,6 +34,11 @@ public class AzureFunction(IMediator mediator, ITelegramBot telegramBot, IConver
         {
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             _logger.LogInformation($"Request is {requestBody}");
+
+            // await telegramBot.SetMyCommandsAsync(
+            //     TelegramConstants.Commands.Select(kvp => new BotCommand(kvp.Key, kvp.Value))
+            //         .ToArray()
+            // );
 
             Update request = JsonSerializer.Deserialize<Update>(requestBody, JsonBotAPI.Options);
 
@@ -47,6 +55,7 @@ public class AzureFunction(IMediator mediator, ITelegramBot telegramBot, IConver
                 
                 if (messageId.HasValue)
                 {
+                    _logger.LogInformation("Callback pressed. Removing buttons");
                     await telegramBot.EditMessageReplyMarkupAsync(chatId, messageId.Value, buttons: null);
                 }
             }
@@ -54,6 +63,28 @@ public class AzureFunction(IMediator mediator, ITelegramBot telegramBot, IConver
             {
                 chatId = request.Message.Chat.Id;
                 text = request.Message?.Text;
+            }
+            else
+            {
+                _logger.LogWarning($"Unknown message type: {request.Type}");
+                return await CreateResponse(req);
+            }
+
+            if (chatId < 0)
+            {
+                _logger.LogInformation($"This is chat {chatId}");
+            }
+
+            var user = await userRepository.GetUserById(chatId);
+            if (user == null)
+            {
+                _logger.LogInformation($"New user with id {chatId}");
+                
+                await userRepository.CreateUser(new User(chatId, false, false));
+
+                //await mediator.Send(new SendInfoCommand() { ChatId = chatId });
+                
+                _logger.LogInformation($"New user with id {chatId} has been created");
             }
 
             _logger.LogInformation(
@@ -71,7 +102,7 @@ public class AzureFunction(IMediator mediator, ITelegramBot telegramBot, IConver
             var arr = fullText.Split(" ");
 
             var textCommand = arr[0].Trim();
-            string parameter = fullText.Replace(arr[0], "").Trim();
+            string parameter = !string.IsNullOrEmpty(arr[0])? fullText.Replace(arr[0], "").Trim() : string.Empty;
 
             _logger.LogInformation($"Command is {textCommand} Parameter is {parameter}");
 
@@ -80,6 +111,9 @@ public class AzureFunction(IMediator mediator, ITelegramBot telegramBot, IConver
             if (!string.IsNullOrWhiteSpace(text) && !text.StartsWith("/"))
             {
                 var (stepCommand, bingoId) = await conversationFlowManager.GetStepAsync(chatId);
+                
+                _logger.LogInformation($"Step command: {stepCommand} BingoId {bingoId}");
+                
                 if (!string.IsNullOrEmpty(stepCommand))
                 {
                     switch (stepCommand)
@@ -100,15 +134,13 @@ public class AzureFunction(IMediator mediator, ITelegramBot telegramBot, IConver
             
             if (command is null)
             {
+                _logger.LogInformation($"Command is null. Checking textCommand {textCommand}");
+                
                 switch (textCommand)
                 {
                     case "/add":
                         command = new AddBingoCommand()
                             { ChatId = chatId, MessageToEdit = (int)messageId!, Text = parameter };
-                        break;
-                    case "/info":
-                        command = new GetBingoDescriptionCommand()
-                            { ChatId = chatId, MessageId = messageId, BingoId = int.Parse(parameter) };
                         break;
                     case "/question":
                         command = new GetBingoQuestionCommand() { ChatId = chatId, BingoId = int.Parse(parameter) };
@@ -132,11 +164,34 @@ public class AzureFunction(IMediator mediator, ITelegramBot telegramBot, IConver
                             ChatId = chatId, MessageId = (int)messageId!, BingoId = bingoId
                         };
                         break;
+                    
+                    case "/subscribe":
+                        command = new SubscribeCommand()
+                        {
+                            ChatId = chatId, 
+                        };
+                        break;
+                    
+                    case "/unsubscribe":
+                        command = new UnsubscribeCommand()
+                        {
+                            ChatId = chatId, 
+                        };
+                        break;
+                    
+                    case "/start":
+                    case "/info":
+                        //command = new SendInfoCommand(){ChatId = chatId};
+                        break;
+                        
                     case "/skip":
                         // do nothing
                         break;
                     default:
-                        command = new GetBingoDescriptionCommand() { ChatId = chatId, Text = text };
+                        if (!string.IsNullOrEmpty(text))
+                        {
+                            command = new GetBingoDescriptionCommand() { ChatId = chatId, Text = text };
+                        }
                         break;
                 }
             }
