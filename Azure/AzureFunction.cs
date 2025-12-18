@@ -6,6 +6,7 @@ using Bingo.Application.DeleteQuestion;
 using Bingo.Application.EditBingoDescription;
 using Bingo.Application.GetBingoDescription;
 using Bingo.Application.GetBingoQuestion;
+using Bingo.Application.Info;
 using Bingo.Application.RandomBingoDescription;
 using Bingo.Application.SendRandomBingoToActiveSubscribers;
 using Bingo.Application.Subscribe;
@@ -82,7 +83,7 @@ public class AzureFunction(IMediator mediator, ITelegramBot telegramBot, IConver
                 
                 await userRepository.CreateUser(new User(chatId, false, false));
 
-                //await mediator.Send(new SendInfoCommand() { ChatId = chatId });
+                await mediator.Send(new SendInfoCommand() { ChatId = chatId });
                 
                 _logger.LogInformation($"New user with id {chatId} has been created");
             }
@@ -181,7 +182,7 @@ public class AzureFunction(IMediator mediator, ITelegramBot telegramBot, IConver
                     
                     case "/start":
                     case "/info":
-                        //command = new SendInfoCommand(){ChatId = chatId};
+                        command = new SendInfoCommand(){ChatId = chatId};
                         break;
                         
                     case "/skip":
