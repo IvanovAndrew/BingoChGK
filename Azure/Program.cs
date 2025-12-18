@@ -17,6 +17,7 @@ var host = new HostBuilder()
         services.AddApplicationInsightsTelemetryWorkerService();
         services.ConfigureFunctionsApplicationInsights();
         services.AddLogging();
+        services.AddMemoryCache();
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetAssembly(typeof(AddBingoCommand)), Assembly.GetAssembly(typeof(BingoDescriptionShownDomainEvent))));
 

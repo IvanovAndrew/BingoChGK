@@ -1,13 +1,27 @@
 ﻿using Bingo.Domain;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Bingo.Application;
 
-public class BingoQuestionService(IQuestionService questionService)
+public class BingoQuestionService(IQuestionService questionService, IMemoryCache cache)
 {
+    private static string CacheKey(int bingoId) => $"bingo-questions:{bingoId}";
+    
     public async Task<List<Question>> GetQuestionsForBingoAsync(int bingoId)
     {
-        return await questionService.GetQuestions(bingoId);
+        return await cache.GetOrCreateAsync(
+                   CacheKey(bingoId),
+                   async entry =>
+                   {
+                       entry.AbsoluteExpirationRelativeToNow =
+                           TimeSpan.FromMinutes(10);
+
+                       return await questionService.GetQuestions(bingoId);
+                   })
+               ?? new List<Question>();
     }
+    
+    public void Invalidate(int bingoId) => cache.Remove(CacheKey(bingoId));
 }
 
 public interface IQuestionService

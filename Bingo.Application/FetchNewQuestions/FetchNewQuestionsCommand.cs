@@ -9,7 +9,7 @@ public record FetchNewQuestionsCommand : IRequest
     public int BingoId { get; init; }
 }
 
-public class FetchNewQuestionsCommandHandler(IBingoRepository bingoRepository, IQuestionService questionService, ILogger<FetchNewQuestionsCommandHandler> logger) : IRequestHandler<FetchNewQuestionsCommand>
+public class FetchNewQuestionsCommandHandler(IBingoRepository bingoRepository, IQuestionService questionService, BingoQuestionService bingoQuestionService, ILogger<FetchNewQuestionsCommandHandler> logger) : IRequestHandler<FetchNewQuestionsCommand>
 {
     public async Task Handle(FetchNewQuestionsCommand request, CancellationToken cancellationToken)
     {
@@ -46,6 +46,7 @@ public class FetchNewQuestionsCommandHandler(IBingoRepository bingoRepository, I
         {
             await questionService.LinkQuestionsToBingo(newQuestions, bingo.Id);
             logger.LogInformation("New questions inserted for bingo {BingoId}", bingo.Id);
+            bingoQuestionService.Invalidate(bingo.Id);
         }
 
         logger.LogInformation("Finished fetching new questions for bingo {BingoId}", bingo.Id);

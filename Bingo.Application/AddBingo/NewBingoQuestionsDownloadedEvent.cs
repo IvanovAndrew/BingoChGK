@@ -19,11 +19,11 @@ public class NewBingoQuestionsDownloadedEventHandler(ITelegramBot telegramBot) :
             notification.ChatId, 
             notification.MessageId,
             $"{notification.QuestionsCount} {(notification.QuestionsCount > 1 ? "questions" : "question")} for {notification.BingoWord} {(notification.QuestionsCount % 10 == 1 ? "has" : "have")} been added",
-            buttons: new TelegramButton[]
-            {
+            buttons:
+            [
                 TelegramButton.EditDescriptionButton(notification.BingoId),
                 TelegramButton.ShowAQuestionButton(notification.BingoId),
-                TelegramButton.SkipButton("OK"),
-            }, cancellationToken: cancellationToken);
+                TelegramButton.SkipButton("OK")
+            ], cancellationToken: cancellationToken);
     }
 }

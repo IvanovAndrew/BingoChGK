@@ -1,10 +1,11 @@
-﻿using Bingo.Domain;
+﻿using Bingo.Application;
+using Bingo.Domain;
 using Bingo.Infrastructure.Database;
 using Microsoft.Extensions.Logging;
 
 namespace Bingo.Infrastructure;
 
-public class BingoRepository(Supabase.Client db, ILogger<BingoRepository> logger) : IBingoRepository
+public class BingoRepository(Supabase.Client db, IUnitOfWork unitOfWork, ILogger<BingoRepository> logger) : IBingoRepository
 {
     public async Task<List<Domain.Bingo>> GetAllBingos()
     {
@@ -55,10 +56,12 @@ public class BingoRepository(Supabase.Client db, ILogger<BingoRepository> logger
     public async Task SaveBingo(Domain.Bingo bingo)
     {
         await db.From<BingoDb>().Insert(BingoMapper.ToDbModel(bingo));
+        unitOfWork.Register(bingo);
     }
 
     public async ValueTask UpdateBingo(Domain.Bingo bingo)
     {
         await db.From<BingoDb>().Update(BingoMapper.ToDbModel(bingo));
+        unitOfWork.Register(bingo);
     }
 }

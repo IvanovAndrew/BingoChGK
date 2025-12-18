@@ -6,7 +6,7 @@ namespace Bingo.Application.EditBingoDescription;
 
 public class EditBingoDescriptionCommandHandler(
     IBingoRepository bingoRepository,
-    IMediator mediator,
+    IUnitOfWork unitOfWork,
     ILogger<EditBingoDescriptionCommand> logger)
     : IRequestHandler<EditBingoDescriptionCommand>
 {
@@ -19,12 +19,6 @@ public class EditBingoDescriptionCommandHandler(
         bingo.UpdateDescription(request.Description, request.ChatId);
         
         await bingoRepository.UpdateBingo(bingo);
-
-        foreach (var domainEvent in bingo.GetEvents())
-        {
-            await mediator.Publish(domainEvent, cancellationToken);
-        }
-
-        bingo.ClearEvents();
+        await unitOfWork.CommitAsync(cancellationToken);
     }
 }
